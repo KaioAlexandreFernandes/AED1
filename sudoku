@@ -1,0 +1,99 @@
+#include <stdio.h>
+
+const int TAMANHO = 9;
+
+// Função para imprimir o Sudoku
+void imprimirSudoku(int sudoku[9][9]) {
+    for (int linha = 0; linha < TAMANHO; linha++) {
+        for (int coluna = 0; coluna < TAMANHO; coluna++) {
+            printf("%d ", sudoku[linha][coluna]);
+        }
+        printf("\n");
+    }
+}
+
+// Função para ler o Sudoku do usuário
+void lerSudoku(int sudoku[9][9]) {
+    printf("Insira os valores do Sudoku linha por linha.\n");
+    printf("Use 0 para representar os espaços vazios.\n\n");
+    
+    for (int linha = 0; linha < TAMANHO; linha++) {
+        for (int coluna = 0; coluna < TAMANHO; coluna++) {
+            printf("Valor para posição [%d][%d]: ", linha + 1, coluna + 1);
+            scanf("%d", &sudoku[linha][coluna]);
+
+            // Valida se o valor inserido está entre 0 e 9
+            while (sudoku[linha][coluna] < 0 || sudoku[linha][coluna] > 9) {
+                printf("Valor inválido! Insira um número entre 0 e 9: ");
+                scanf("%d", &sudoku[linha][coluna]);
+            }
+        }
+    }
+}
+
+// Função para verificar se o número pode ser colocado
+int ehValido(int sudoku[9][9], int linha, int coluna, int num) {
+    for (int x = 0; x < TAMANHO; x++) {
+        if (sudoku[linha][x] == num || sudoku[x][coluna] == num) {
+            return 0;
+        }
+    }
+
+    int inicioLinha = linha - linha % 3;
+    int inicioColuna = coluna - coluna % 3;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (sudoku[i + inicioLinha][j + inicioColuna] == num) {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+// Função para resolver o Sudoku usando Backtracking
+int resolverSudoku(int sudoku[9][9]) {
+    int linha, coluna;
+    int espacoVazio = 0;
+
+    for (linha = 0; linha < TAMANHO; linha++) {
+        for (coluna = 0; coluna < TAMANHO; coluna++) {
+            if (sudoku[linha][coluna] == 0) {
+                espacoVazio = 1;
+                break;
+            }
+        }
+        if (espacoVazio) break;
+    }
+
+    if (!espacoVazio) return 1;
+
+    for (int num = 1; num <= 9; num++) {
+        if (ehValido(sudoku, linha, coluna, num)) {
+            sudoku[linha][coluna] = num;
+
+            if (resolverSudoku(sudoku)) return 1;
+
+            sudoku[linha][coluna] = 0;
+        }
+    }
+    return 0;
+}
+
+int main() {
+    int sudoku[9][9];
+
+    // Lê o Sudoku do usuário
+    lerSudoku(sudoku);
+
+    // Resolve o Sudoku e imprime o resultado
+    if (resolverSudoku(sudoku)) {
+        printf("\nSudoku resolvido:\n");
+        imprimirSudoku(sudoku);
+    } else {
+        printf("\nSem solução\n");
+    }
+
+    return 0;
+}
