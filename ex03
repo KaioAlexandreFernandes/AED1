@@ -1,0 +1,104 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct No {
+    char *texto;
+    struct No *proximo;
+} No;
+
+void adicionarNaLista(char *palavra, No *inicio) {
+    No *atual = inicio;
+    No *novo = malloc(sizeof(No));
+
+    novo->texto = malloc(strlen(palavra) + 1);
+    strcpy(novo->texto, palavra);
+    novo->proximo = NULL;
+
+    while (atual->proximo != NULL) {
+        atual = atual->proximo;
+    }
+    atual->proximo = novo;
+}
+
+void exibirLista(No *inicio) {
+    No *atual = inicio->proximo;
+
+    while (atual != NULL) {
+        printf("%s", atual->texto);
+        if (atual->proximo != NULL) printf(" ");
+        atual = atual->proximo;
+    }
+    printf("\n");
+}
+
+void separarPalavras(char *frase, No *inicio) {
+    int i = 0, tamanho = 0;
+    char *palavra;
+
+    while (frase[i] != '\0') {
+        tamanho = 0;
+
+        if (frase[i] != ' ') {
+            while (frase[i + tamanho] != ' ' && frase[i + tamanho] != '\0') {
+                tamanho++;
+            }
+            
+            palavra = malloc((tamanho + 1) * sizeof(char));
+            strncpy(palavra, &frase[i], tamanho);
+            palavra[tamanho] = '\0';
+
+            adicionarNaLista(palavra, inicio);
+            free(palavra);
+        }
+        i += tamanho + 1;
+    }
+}
+
+void procurarEConectar(char *chave, No *lista1, No *lista2) {
+    No *atual1 = lista1->proximo;
+    No *anterior1 = lista1;
+
+    while (atual1 != NULL && strcmp(atual1->texto, chave) != 0) {
+        anterior1 = atual1;
+        atual1 = atual1->proximo;
+    }
+
+    if (atual1 == NULL) {
+        anterior1->proximo = lista2->proximo;
+    } else {
+        anterior1->proximo = lista2->proximo;
+        No *finalLista2 = lista2->proximo;
+        while (finalLista2->proximo != NULL) {
+            finalLista2 = finalLista2->proximo;
+        }
+        finalLista2->proximo = atual1;
+    }
+}
+
+int main() {
+    No *lista1 = malloc(sizeof(No));
+    lista1->proximo = NULL;
+
+    No *lista2 = malloc(sizeof(No));
+    lista2->proximo = NULL;
+
+    char frase[100000];
+
+    fgets(frase, sizeof(frase), stdin);
+    frase[strcspn(frase, "\n")] = '\0';
+    separarPalavras(frase, lista1);
+
+    fgets(frase, sizeof(frase), stdin);
+    frase[strcspn(frase, "\n")] = '\0';
+    separarPalavras(frase, lista2);
+
+    fgets(frase, sizeof(frase), stdin);
+    frase[strcspn(frase, "\n")] = '\0';
+
+    procurarEConectar(frase, lista1, lista2);
+
+    exibirLista(lista1);
+
+    return 0;
+}
