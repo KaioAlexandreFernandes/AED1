@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct no {
+    char *texto;
+    struct no *proximo;
+} no;
+
+void adicionarPalavra(char *palavra, no *inicio) {
+    no *novo, *atual, *proximo;
+    atual = inicio;
+    proximo = inicio->proximo;
+
+    novo = malloc(sizeof(no));
+    novo->texto = malloc((strlen(palavra) + 1) * sizeof(char));
+    strcpy(novo->texto, palavra);
+
+    while (proximo != NULL && strcmp(proximo->texto, palavra) < 0) {
+        atual = proximo;
+        proximo = proximo->proximo;
+    }
+    if (proximo != NULL && strcmp(proximo->texto, palavra) == 0) {
+        free(novo->texto);
+        free(novo);
+        return;
+    }
+
+    novo->proximo = atual->proximo;
+    atual->proximo = novo;
+}
+
+void limparLista(no *inicio) {
+    no *atual = inicio->proximo;
+    while (atual != NULL) {
+        no *temp = atual;
+        atual = atual->proximo;
+        free(temp->texto);
+        free(temp);
+    }
+    inicio->proximo = NULL;
+}
+
+void dividirEmPalavras(char *frase, no *inicio) {
+    int i = 0, tamanho = 0;
+    char *palavra;
+
+    while (frase[i] != '\0') {
+        tamanho = 0;
+        if (frase[i] != ' ') {
+            while (frase[i + tamanho] != ' ' && frase[i + tamanho] != '\0') tamanho++;
+
+            palavra = malloc((tamanho + 1) * sizeof(char));
+            strncpy(palavra, &frase[i], tamanho);
+            palavra[tamanho] = '\0';
+
+            adicionarPalavra(palavra, inicio);
+            free(palavra);
+        }
+        i += (tamanho + 1);
+    }
+}
+
+void mostrarLista(no *inicio) {
+    no *atual = inicio->proximo;
+    if (atual != NULL) {
+        while (atual->proximo != NULL) {
+            printf("%s ", atual->texto);
+            atual = atual->proximo;
+        }
+        printf("%s\n", atual->texto);
+    }
+}
+
+int main() {
+    no *inicio = malloc(sizeof(no));
+    inicio->proximo = NULL;
+
+    int numLinhas;
+    char frase[200000];
+
+    scanf("%d", &numLinhas);
+    getchar();
+
+    while (numLinhas > 0) {
+        if (fgets(frase, sizeof(frase), stdin)) {
+            frase[strcspn(frase, "\n")] = '\0';
+            dividirEmPalavras(frase, inicio);
+            mostrarLista(inicio);
+            limparLista(inicio);
+            numLinhas--;
+        }
+    }
+
+    free(inicio);
+    return 0;
+}
